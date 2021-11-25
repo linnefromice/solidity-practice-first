@@ -1,5 +1,6 @@
 pragma solidity >=0.7.0 <0.9.0;
 contract Ballot {
+  // 投票者
   struct Voter {
     uint weight;
     bool voted;
@@ -7,6 +8,7 @@ contract Ballot {
     uint vote;
   }
 
+  // 候補(被投票者)
   struct Proposal {
     bytes32 name;
     uint voteCount;
@@ -30,6 +32,8 @@ contract Ballot {
     }
   }
 
+  // 投票権の付与
+  // chairpersion のみ利用可能
   function giveRightToVote(address voter) external {
     require(
       msg.sender == chairperson,
@@ -43,6 +47,7 @@ contract Ballot {
     voters[voter].weight = 1;
   }
 
+  // 投票権をデリゲートする
   function delegate(address to) external {
     Voter storage sender = voters[msg.sender];
     require(!sender.voted, "You already voted."); // 既に投票済み
