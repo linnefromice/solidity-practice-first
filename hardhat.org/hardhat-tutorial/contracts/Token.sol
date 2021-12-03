@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: <SPDX-License>
 pragma solidity ^0.7.3;
 
 contract Token {
