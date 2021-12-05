@@ -130,4 +130,6 @@ dist
 # Local History for Visual Studio Code
 .history/
 
-
+# hardhat
+artifacts/
+cache/
