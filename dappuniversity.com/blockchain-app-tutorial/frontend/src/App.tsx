@@ -68,10 +68,11 @@ const abi = [ // update every time We deploy contract / copy from typechain/fact
 export const App: VFC = () => {
   const provider = new ethers.providers.JsonRpcProvider();
   const contract = new ethers.Contract(contractAddress, abi, provider);
-  const { taskCount } = contract.functions;
+  const { taskCount, tasks } = contract.functions;
 
   const [addresses, setAddresses] = useState<string[]>([]);
   const [taskCountValue, setTaskCountValue] = useState<string>("");
+  const [taskValue, setTaskValue] = useState<string | null>(null); // TODO: modify `string` type, use type
 
   useEffect(() => {
     const getAddresses = async () => {
@@ -79,20 +80,26 @@ export const App: VFC = () => {
       setAddresses(addresses);
     }
     const getTaskCount = async () => {
-      const _taskCount = await taskCount()
+      const _taskCount = await taskCount();
       setTaskCountValue(_taskCount);
+    }
+    const getTask = async () => {
+      const _task = await tasks(1); // TODO: input number
+      setTaskValue(_task.toString()); // TODO: use type
     }
     getAddresses();
     getTaskCount();
+    getTask()
   }, [])
 
   return (
     <div>
       <h1>Hello world!</h1>
       <ul>
-        {addresses.map((addr, index) => <ol key={index}>{addr}</ol>)}
+        {addresses.map((addr, index) => <ol key={`address.${index}`}>{addr}</ol>)}
       </ul>
       <p>{`taskCount ... ${taskCountValue}`}</p>
+      {taskValue && <p>{taskValue}</p>}
     </div>
   );
 }
