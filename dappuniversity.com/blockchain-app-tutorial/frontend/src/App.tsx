@@ -5,20 +5,22 @@ export const App: VFC = () => {
   const provider = new ethers.providers.JsonRpcProvider();
   const signer = provider.getSigner();
 
-  const [address, setAddress] = useState("No contract...")
+  const [addresses, setAddresses] = useState<string[]>([]);
 
   useEffect(() => {
-    const getAddress = async () => {
-      const address = await signer.getAddress()
-      setAddress(address);
+    const getAddresses = async () => {
+      const addresses = await provider.listAccounts();
+      setAddresses(addresses);
     }
-    getAddress();
+    getAddresses();
   }, [])
 
   return (
     <div>
       <h1>Hello world!</h1>
-      <p>{address}</p>
+      <ul>
+        {addresses.map((addr, index) => <ol key={index}>{addr}</ol>)}
+      </ul>
     </div>
   );
 }
