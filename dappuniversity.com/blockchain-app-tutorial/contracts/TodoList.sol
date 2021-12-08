@@ -11,4 +11,13 @@ contract TodoList {
     }
 
     mapping(uint => Task) public tasks;
+
+    constructor() {
+        createTask("Check out dappuniversity.com");
+    }
+
+    function createTask(string memory _content) public {
+        taskCount++;
+        tasks[taskCount] = Task(taskCount, _content, false);
+    }
 }
