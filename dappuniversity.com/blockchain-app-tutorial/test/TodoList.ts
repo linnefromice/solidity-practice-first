@@ -17,7 +17,7 @@ describe("TodoList", () => {
 
     await expect(todoList.createTask("Test Task"))
       .to.emit(todoList, "TaskCreated")
-      .withArgs(2, "Test Task", false);
+      .withArgs(4, "Test Task", false);
   });
 
   it("toggles task completion", async () => {
