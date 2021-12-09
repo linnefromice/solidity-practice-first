@@ -16,6 +16,8 @@ contract TodoList {
 
     constructor() {
         createTask("Check out dappuniversity.com");
+        createTask("Use hardhat, library for creating smart contract");
+        createTask("Use ethersjs, library for connection with smart contract to dapps");
     }
 
     function createTask(string memory _content) public {

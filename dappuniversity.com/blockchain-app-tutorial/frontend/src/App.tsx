@@ -87,7 +87,7 @@ const useContract = () => {
       // get Tasks
       const _tasks = []
       for (let i = 1; i <= _taskCount; i++) {
-        const _task = await tasks(1);
+        const _task = await tasks(i);
         _tasks.push(_task.toString())
       }
       setTasksValue(_tasks);
