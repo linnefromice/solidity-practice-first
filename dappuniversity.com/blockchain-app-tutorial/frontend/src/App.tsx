@@ -65,10 +65,11 @@ const abi = [ // update every time We deploy contract / copy from typechain/fact
   },
 ];
 
-export const App: VFC = () => {
+const useContract = () => {
   const provider = new ethers.providers.JsonRpcProvider();
   const contract = new ethers.Contract(contractAddress, abi, provider);
   const { taskCount, tasks } = contract.functions;
+
 
   const [addresses, setAddresses] = useState<string[]>([]);
   const [taskCountValue, setTaskCountValue] = useState<string>("");
@@ -78,10 +79,6 @@ export const App: VFC = () => {
     const getAddresses = async () => {
       const addresses = await provider.listAccounts();
       setAddresses(addresses);
-    }
-    const getTaskCount = async () => {
-      const _taskCount = await taskCount();
-      setTaskCountValue(_taskCount);
     }
     const getTasks = async () => {
       // get taskCount
@@ -98,6 +95,16 @@ export const App: VFC = () => {
     getAddresses();
     getTasks()
   }, [])
+
+  return {
+    addresses,
+    taskCountValue,
+    tasksValue
+  }
+}
+
+export const App: VFC = () => {
+  const { addresses, taskCountValue, tasksValue } = useContract();
 
   return (
     <div>
