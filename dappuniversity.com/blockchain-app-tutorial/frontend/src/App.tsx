@@ -1,7 +1,9 @@
 import React, { useEffect, useState, VFC } from "react";
 import { ethers } from "ethers";
 
+/** Contract's address */
 const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // update every time We deploy contract / copy from log (`npx hardhat run (file for deployment)`)
+/** Contract's abi */
 const abi = [ // update every time We deploy contract / copy from typechain/factories/TodoList__factory.ts
   {
     inputs: [],
@@ -65,6 +67,10 @@ const abi = [ // update every time We deploy contract / copy from typechain/fact
   },
 ];
 
+/**
+ * use Smart Contract
+ * @returns
+ */
 const useContract = () => {
   const provider = new ethers.providers.JsonRpcProvider();
   const contract = new ethers.Contract(contractAddress, abi, provider);
@@ -103,6 +109,10 @@ const useContract = () => {
   }
 }
 
+/**
+ * Main Component
+ * @returns 
+ */
 export const App: VFC = () => {
   const { addresses, taskCountValue, tasksValue } = useContract();
 
