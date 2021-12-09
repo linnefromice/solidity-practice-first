@@ -72,7 +72,7 @@ export const App: VFC = () => {
 
   const [addresses, setAddresses] = useState<string[]>([]);
   const [taskCountValue, setTaskCountValue] = useState<string>("");
-  const [taskValue, setTaskValue] = useState<string | null>(null); // TODO: modify `string` type, use type
+  const [tasksValue, setTasksValue] = useState<string[]>([]); // TODO: modify `string` type, use type
 
   useEffect(() => {
     const getAddresses = async () => {
@@ -83,13 +83,20 @@ export const App: VFC = () => {
       const _taskCount = await taskCount();
       setTaskCountValue(_taskCount);
     }
-    const getTask = async () => {
-      const _task = await tasks(1); // TODO: input number
-      setTaskValue(_task.toString()); // TODO: use type
+    const getTasks = async () => {
+      // get taskCount
+      const _taskCount = await taskCount();
+      setTaskCountValue(_taskCount);
+      // get Tasks
+      const _tasks = []
+      for (let i = 1; i <= _taskCount; i++) {
+        const _task = await tasks(1);
+        _tasks.push(_task.toString())
+      }
+      setTasksValue(_tasks);
     }
     getAddresses();
-    getTaskCount();
-    getTask()
+    getTasks()
   }, [])
 
   return (
@@ -99,7 +106,9 @@ export const App: VFC = () => {
         {addresses.map((addr, index) => <ol key={`address.${index}`}>{addr}</ol>)}
       </ul>
       <p>{`taskCount ... ${taskCountValue}`}</p>
-      {taskValue && <p>{taskValue}</p>}
+      <ul>
+        {tasksValue.map((task, index) => <ol key={`task.${index}`}>{task}</ol>)}
+      </ul>
     </div>
   );
 }
