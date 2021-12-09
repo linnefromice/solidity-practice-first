@@ -105,7 +105,10 @@ const useContract = () => {
   const signer = provider.getSigner();
   const contractWithSigner = contract.connect(signer);
   const updateTaskContent = (e: React.ChangeEvent<HTMLInputElement>) => setTaskContent(e.target.value);
-  const handleCreateTask = async () => await contractWithSigner.functions.createTask(taskContent);
+  const handleCreateTask = async () => {
+    if (taskContent === "") return;
+    await contractWithSigner.functions.createTask(taskContent);
+  };
 
   return {
     addresses,
