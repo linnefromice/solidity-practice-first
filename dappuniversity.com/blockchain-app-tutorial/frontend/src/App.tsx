@@ -76,10 +76,10 @@ const useContract = () => {
   const contract = new ethers.Contract(contractAddress, abi, provider);
   const { taskCount, tasks } = contract.functions;
 
-
   const [addresses, setAddresses] = useState<string[]>([]);
   const [taskCountValue, setTaskCountValue] = useState<string>("");
   const [tasksValue, setTasksValue] = useState<string[]>([]); // TODO: modify `string` type, use type
+  const [taskContent, setTaskContent] = useState<string>("");
 
   useEffect(() => {
     const getAddresses = async () => {
@@ -102,10 +102,17 @@ const useContract = () => {
     getTasks()
   }, [])
 
+  const signer = provider.getSigner();
+  const contractWithSigner = contract.connect(signer);
+  const updateTaskContent = (e: React.ChangeEvent<HTMLInputElement>) => setTaskContent(e.target.value);
+  const handleCreateTask = async () => await contractWithSigner.functions.createTask(taskContent);
+
   return {
     addresses,
     taskCountValue,
-    tasksValue
+    tasksValue,
+    updateTaskContent,
+    handleCreateTask
   }
 }
 
@@ -114,7 +121,18 @@ const useContract = () => {
  * @returns 
  */
 export const App: VFC = () => {
-  const { addresses, taskCountValue, tasksValue } = useContract();
+  const {
+    addresses,
+    taskCountValue,
+    tasksValue,
+    updateTaskContent,
+    handleCreateTask
+  } = useContract();
+
+  const onClick = async () => {
+    await handleCreateTask();
+    window.location.reload();
+  }
 
   return (
     <div>
@@ -122,6 +140,10 @@ export const App: VFC = () => {
       <ul>
         {addresses.map((addr, index) => <ol key={`address.${index}`}>{addr}</ol>)}
       </ul>
+      <p>
+        <input onChange={updateTaskContent} />
+        <button onClick={onClick}>Create Task</button>
+      </p>
       <p>{`taskCount ... ${taskCountValue}`}</p>
       <ul>
         {tasksValue.map((task, index) => <ol key={`task.${index}`}>{task}</ol>)}
