@@ -67,6 +67,12 @@ const abi = [ // update every time We deploy contract / copy from typechain/fact
   },
 ];
 
+type Task = {
+  id: number,
+  content: string,
+  completed: boolean
+}
+
 /**
  * use Smart Contract
  * @returns
@@ -78,7 +84,7 @@ const useContract = () => {
 
   const [addresses, setAddresses] = useState<string[]>([]);
   const [taskCountValue, setTaskCountValue] = useState<string>("");
-  const [tasksValue, setTasksValue] = useState<string[]>([]); // TODO: modify `string` type, use type
+  const [tasksValue, setTasksValue] = useState<Task[]>([]);
   const [taskContent, setTaskContent] = useState<string>("");
 
   useEffect(() => {
@@ -94,7 +100,11 @@ const useContract = () => {
       const _tasks = []
       for (let i = 1; i <= _taskCount; i++) {
         const _task = await tasks(i);
-        _tasks.push(_task.toString())
+        console.log(_task)
+        _tasks.push({
+          ..._task,
+          id: _task.id._hex // note: id's type is BigNumber { _hex: string, _isBigNumber: boolean }
+        })
       }
       setTasksValue(_tasks);
     }
@@ -148,9 +158,22 @@ export const App: VFC = () => {
         <button onClick={onClick}>Create Task</button>
       </p>
       <p>{`taskCount ... ${taskCountValue}`}</p>
-      <ul>
-        {tasksValue.map((task, index) => <ol key={`task.${index}`}>{task}</ol>)}
-      </ul>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Content</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tasksValue.map((t, index) => <tr key={`task.${index}`}>
+            <td>{t.id}</td>
+            <td>{t.content}</td>
+            <td>{t.completed ? "Completed" : "Not Completed"}</td>
+          </tr>)}
+        </tbody>
+      </table>
     </div>
   );
 }
