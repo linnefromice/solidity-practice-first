@@ -11,6 +11,50 @@ const abi = [ // update every time We deploy contract / copy from typechain/fact
     type: "constructor",
   },
   {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "id",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "bool",
+        name: "completed",
+        type: "bool",
+      },
+    ],
+    name: "TaskCompleted",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "id",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "string",
+        name: "content",
+        type: "string",
+      },
+      {
+        indexed: false,
+        internalType: "bool",
+        name: "completed",
+        type: "bool",
+      },
+    ],
+    name: "TaskCreated",
+    type: "event",
+  },
+  {
     inputs: [
       {
         internalType: "string",
@@ -65,10 +109,23 @@ const abi = [ // update every time We deploy contract / copy from typechain/fact
     stateMutability: "view",
     type: "function",
   },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_id",
+        type: "uint256",
+      },
+    ],
+    name: "toggleCompleted",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
 ];
 
 type Task = {
-  id: number,
+  id: string,
   content: string,
   completed: boolean
 }
@@ -102,7 +159,8 @@ const useContract = () => {
         const _task = await tasks(i);
         _tasks.push({
           ..._task,
-          id: _task.id._hex // note: id's type is BigNumber { _hex: string, _isBigNumber: boolean }
+          id: i
+          // id: _task.id._hex // note: id's type is BigNumber { _hex: string, _isBigNumber: boolean }
         })
       }
       setTasksValue(_tasks);
@@ -118,7 +176,13 @@ const useContract = () => {
     if (taskContent === "") return;
     await contractWithSigner.functions.createTask(taskContent);
   };
-  const requestToggleCompleted = async () => {}
+  const requestToggleCompleted = async (id: string) => {
+    for (const _task of tasksValue) {
+      if (id === _task.id) {
+        await contractWithSigner.functions.toggleCompleted(id)
+      }
+    }
+  }
 
   return {
     addresses,
@@ -149,8 +213,8 @@ export const App: VFC = () => {
     window.location.reload();
   }
 
-  const handleToggleCompleted = async () => {
-    await requestToggleCompleted();
+  const handleToggleCompleted = async (id: string) => {
+    await requestToggleCompleted(id);
     window.location.reload();
   }
 
@@ -179,7 +243,7 @@ export const App: VFC = () => {
             <td>{t.id}</td>
             <td>{t.content}</td>
             <td>{t.completed ? "Completed" : "Not Completed"}</td>
-            <td><button onClick={handleToggleCompleted}>Change</button></td>
+            <td><button onClick={() => handleToggleCompleted(t.id)}>Change</button></td>
           </tr>)}
         </tbody>
       </table>
