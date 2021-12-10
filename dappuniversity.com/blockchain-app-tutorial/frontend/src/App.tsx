@@ -100,7 +100,6 @@ const useContract = () => {
       const _tasks = []
       for (let i = 1; i <= _taskCount; i++) {
         const _task = await tasks(i);
-        console.log(_task)
         _tasks.push({
           ..._task,
           id: _task.id._hex // note: id's type is BigNumber { _hex: string, _isBigNumber: boolean }
@@ -115,17 +114,19 @@ const useContract = () => {
   const signer = provider.getSigner();
   const contractWithSigner = contract.connect(signer);
   const updateTaskContent = (e: React.ChangeEvent<HTMLInputElement>) => setTaskContent(e.target.value);
-  const handleCreateTask = async () => {
+  const requestCreateTask = async () => {
     if (taskContent === "") return;
     await contractWithSigner.functions.createTask(taskContent);
   };
+  const requestToggleCompleted = async () => {}
 
   return {
     addresses,
     taskCountValue,
     tasksValue,
     updateTaskContent,
-    handleCreateTask
+    requestCreateTask,
+    requestToggleCompleted
   }
 }
 
@@ -139,11 +140,17 @@ export const App: VFC = () => {
     taskCountValue,
     tasksValue,
     updateTaskContent,
-    handleCreateTask
+    requestCreateTask,
+    requestToggleCompleted
   } = useContract();
 
-  const onClick = async () => {
-    await handleCreateTask();
+  const handleCreateTask = async () => {
+    await requestCreateTask();
+    window.location.reload();
+  }
+
+  const handleToggleCompleted = async () => {
+    await requestToggleCompleted();
     window.location.reload();
   }
 
@@ -155,7 +162,7 @@ export const App: VFC = () => {
       </ul>
       <p>
         <input onChange={updateTaskContent} />
-        <button onClick={onClick}>Create Task</button>
+        <button onClick={handleCreateTask}>Create Task</button>
       </p>
       <p>{`taskCount ... ${taskCountValue}`}</p>
       <table>
@@ -164,6 +171,7 @@ export const App: VFC = () => {
             <th>ID</th>
             <th>Content</th>
             <th>Status</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -171,6 +179,7 @@ export const App: VFC = () => {
             <td>{t.id}</td>
             <td>{t.content}</td>
             <td>{t.completed ? "Completed" : "Not Completed"}</td>
+            <td><button onClick={handleToggleCompleted}>Change</button></td>
           </tr>)}
         </tbody>
       </table>
