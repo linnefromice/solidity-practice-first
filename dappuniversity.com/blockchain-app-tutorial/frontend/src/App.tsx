@@ -221,13 +221,16 @@ export const App: VFC = () => {
   return (
     <div>
       <h1>Hello world!</h1>
+      <p>Addresses</p>
       <ul>
-        {addresses.map((addr, index) => <ol key={`address.${index}`}>{addr}</ol>)}
+        {addresses.map((addr, index) => <li key={`address.${index}`}>{addr}</li>)}
       </ul>
       <p>
+        <p>Operate Contract</p>
         <input onChange={updateTaskContent} />
         <button onClick={handleCreateTask}>Create Task</button>
       </p>
+      <p>Tasks</p>
       <p>{`taskCount ... ${taskCountValue}`}</p>
       <table>
         <thead>
