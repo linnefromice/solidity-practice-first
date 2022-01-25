@@ -74,25 +74,62 @@ describe("Project", async () => {
       it.skip("refund to all users", () => {})
     });
     describe("failure", () => {
-      it.skip("Should fail when closed project", () => {})
-      it.skip("Should fail when called by not owner", () => {})
+      const _goalAmount = ethers.utils.parseEther("0.1")
+      it("Should fail when called by not owner", async () => {
+        const { contract, addrs } = await deploy(BigNumber.from(_goalAmount));
+        await expect(
+          contract.connect(addrs[0]).close()
+        ).to.be.revertedWith("Only owner can call this.")
+      })
+      it("Should fail when closed project", async () => {
+        const { contract, owner } = await deploy(BigNumber.from(_goalAmount));
+        await contract.connect(owner).contribute({ value: _goalAmount })
+        await expect(
+          contract.connect(owner).close()
+        ).to.be.revertedWith("This project is already closed.")
+
+      })
     });
   });
 
   describe(".refund", () => {
     describe("success", () => {});
     describe("failure", () => {
-      it.skip("Should fail when active project", () => {})
-      it.skip("Should fail when success project", () => {})
+      const _goalAmount = ethers.utils.parseEther("0.1")
+      it("Should fail when active project", async () => {
+        const { contract, owner } = await deploy(BigNumber.from(_goalAmount));
+        await expect(
+          contract.connect(owner).refund()
+        ).to.be.revertedWith("This project is active.")
+      })
+      it.skip("Should fail when active project (reason is time)", () => {})
+      it("Should fail when success project", async () => {
+        const { contract, owner } = await deploy(BigNumber.from(_goalAmount));
+        await contract.connect(owner).contribute({ value: _goalAmount })
+        await expect(
+          contract.connect(owner).refund()
+        ).to.be.revertedWith("This project was successful.")
+      })
     });
   });
 
   describe(".withdraw", () => {
     describe("success", () => {});
     describe("failure", () => {
-      it.skip("Should fail when called by not owner", async () => {})
-      it.skip("Should fail when active project", async () => {})
-      it.skip("Should fail when success project", async () => {})
+      const _goalAmount = ethers.utils.parseEther("0.1")
+      it("Should fail when called by not owner", async () => {
+        const { contract, addrs } = await deploy(BigNumber.from(_goalAmount));
+        await expect(
+          contract.connect(addrs[0]).withdraw()
+        ).to.be.revertedWith("Only owner can call this.")
+      })
+      it("Should fail when active project", async () => {
+        const { contract, owner } = await deploy(BigNumber.from(_goalAmount));
+        await expect(
+          contract.connect(owner).withdraw()
+        ).to.be.revertedWith("This project is active.")
+      })
+      it.skip("Should fail when active project (reason is time)", () => {})
     });
   });
 })
