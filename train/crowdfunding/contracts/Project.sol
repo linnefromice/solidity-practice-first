@@ -49,7 +49,7 @@ contract Project {
 
   // Contribute to this project.
   function contribute() public payable activePj {
-    require(msg.value >= 0.01 ether, "Need over 0.01ETH for contribution.");
+    require(msg.value >= 0.01 ether, "Need over 0.01 ETH for contribution.");
 
     uint256 _value = msg.value;
     uint256 _donation = donations[msg.sender];
@@ -102,7 +102,7 @@ contract Project {
   }
 
   // Withdraw successed project donations.
-  function withdraw() public payable onlyOwner closedPj successedPj{
+  function withdraw() public payable onlyOwner closedPj successedPj {
     owner.transfer(currentTotalAmount);
   }
 }
