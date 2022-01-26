@@ -2,6 +2,8 @@
 
 pragma solidity ^0.8.4;
 
+import "@openzeppelin/contracts/token/ERC721/presets/ERC721PresetMinterPauserAutoId.sol";
+
 contract ProjectFactory {
   event Created(address _contract, address _owner);
 
@@ -12,6 +14,12 @@ contract ProjectFactory {
     projectAddresses.push(project);
     emit Created(address(project), _projectOwner);
   }
+}
+
+/// @author arata.haruyama
+/// @title badge for contributor
+contract Badge is ERC721PresetMinterPauserAutoId {
+  constructor() ERC721PresetMinterPauserAutoId("Badge","BADGE","https://example.com/token/") {}
 }
 
 /// @author arata.haruyama
