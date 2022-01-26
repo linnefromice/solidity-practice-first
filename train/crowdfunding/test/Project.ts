@@ -56,15 +56,50 @@ describe("Project", async () => {
             contract.connect(owner).contribute({ value: BigNumber.from(insufficientAmount) })
           ).to.be.revertedWith("Need over 0.01 ETH for contribution.")
         });
-        it.skip("Should fail when project closed", () => {})
+        it("Should fail when project closed", async () => {
+          const _amount = ethers.utils.parseEther("0.00999");
+          const { contract, owner } = await deploy(BigNumber.from(_amount));
+          await contract.connect(owner).close();
+          await expect(
+            contract.connect(owner).contribute({ value: BigNumber.from(_amount) })
+          ).to.be.revertedWith("This project is already closed.")
+        })
       });
     });
     describe("process", () => {
+      const _goalAmount = ethers.utils.parseEther("0.1")
       describe("confirm people who can donate", () => {
-        it.skip("enable multi donation by one address", () => {})
-        it.skip("enable donation by owner & others", () => {})  
+        it("enable multi donation by one address", async () => {
+          const { contract, owner } = await deploy(BigNumber.from(_goalAmount));
+          const _valueContributed = _goalAmount.div(BigNumber.from("10"))
+          await contract.connect(owner).contribute({ value: _valueContributed })
+          await contract.connect(owner).contribute({ value: _valueContributed })
+          await contract.connect(owner).contribute({ value: _valueContributed })
+          const currentTotalAmount = await contract.currentTotalAmount()
+          expect(currentTotalAmount).to.equal(_valueContributed.mul(BigNumber.from("3")).toString());
+        })
+        it("enable donation by owner & others", async () => {
+          const { contract, owner, addrs } = await deploy(BigNumber.from(_goalAmount));
+          const _valueContributed = _goalAmount.div(BigNumber.from("10"))
+          await contract.connect(owner).contribute({ value: _valueContributed })
+          await contract.connect(addrs[0]).contribute({ value: _valueContributed })
+          await contract.connect(addrs[0]).contribute({ value: _valueContributed })
+          await contract.connect(addrs[1]).contribute({ value: _valueContributed })
+          await contract.connect(addrs[0]).contribute({ value: _valueContributed })
+          const currentTotalAmount = await contract.currentTotalAmount()
+          expect(currentTotalAmount).to.equal(_valueContributed.mul(BigNumber.from("5")).toString());
+        })
       });
-      it.skip("possible to over goal amount by last donation", () => {})
+      it("possible to over goal amount by last donation", async () => {
+        const { contract, owner } = await deploy(BigNumber.from(_goalAmount));
+        const _valueContributed = _goalAmount.div(BigNumber.from("10"))
+        await contract.connect(owner).contribute({ value: _valueContributed })
+        await contract.connect(owner).contribute({ value: _valueContributed })
+        await contract.connect(owner).contribute({ value: _goalAmount })
+        const currentTotalAmount = await contract.currentTotalAmount()
+        expect(currentTotalAmount).to.equal(_valueContributed.mul(BigNumber.from("12")).toString());
+        expect(await contract.isClosed()).to.equal(true);
+      })
     });
   });
 
@@ -93,7 +128,9 @@ describe("Project", async () => {
   });
 
   describe(".refund", () => {
-    describe("success", () => {});
+    describe("success", () => {
+      it.skip("TODO", () => {})
+    });
     describe("failure", () => {
       const _goalAmount = ethers.utils.parseEther("0.1")
       it("Should fail when active project", async () => {
@@ -114,7 +151,9 @@ describe("Project", async () => {
   });
 
   describe(".withdraw", () => {
-    describe("success", () => {});
+    describe("success", () => {
+      it.skip("TODO", () => {})
+    });
     describe("failure", () => {
       const _goalAmount = ethers.utils.parseEther("0.1")
       it("Should fail when called by not owner", async () => {
