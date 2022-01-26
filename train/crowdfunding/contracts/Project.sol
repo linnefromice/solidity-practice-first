@@ -80,7 +80,7 @@ contract Project {
     if (currentTotalAmount >= goalTotalAmount) {
       isClosed = true;
     }
-    emit Contributed(address(msg.sender), _value);
+    emit Contributed(msg.sender, _value);
   }
 
   // Close project.
@@ -93,8 +93,8 @@ contract Project {
       if (_addr != address(0)) {
         uint256 _donation = donations[_addr];
         if (_donation != 0) {
-          payable(msg.sender).transfer(_donation);
-          donations[msg.sender] = 0;
+          payable(_addr).transfer(_donation);
+          donations[_addr] = 0;
         }
       }
     }
@@ -110,7 +110,7 @@ contract Project {
       donations[msg.sender] = 0;
     }
 
-    emit Refunded(address(msg.sender), _donation);
+    emit Refunded(msg.sender, _donation);
   }
 
   // Withdraw successed project donations.
