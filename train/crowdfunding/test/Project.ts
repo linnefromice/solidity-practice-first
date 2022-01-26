@@ -5,7 +5,7 @@ import { BigNumber } from "ethers";
 const deploy = async (goalTotalAmount: BigNumber) => {
   const [owner, ...addrs] = await ethers.getSigners();
   const factory = await ethers.getContractFactory("Project", owner);
-  const contract = await factory.deploy(goalTotalAmount);
+  const contract = await factory.deploy(owner.address, goalTotalAmount);
   await contract.deployed();
 
   return {

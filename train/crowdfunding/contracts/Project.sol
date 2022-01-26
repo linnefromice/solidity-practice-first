@@ -6,8 +6,8 @@ pragma solidity ^0.8.4;
 contract ProjectFactory {
   Project[] public projectAddresses;
 
-  function createProject(uint _goalAmount) external {
-    Project project = new Project(_goalAmount);
+  function createProject(address _projectOwner, uint _goalAmount) external {
+    Project project = new Project(_projectOwner, _goalAmount);
     projectAddresses.push(project);
   }
 }
@@ -49,8 +49,8 @@ contract Project {
     _;
   }
 
-  constructor(uint _goalAmount) {
-    owner = payable(msg.sender);
+  constructor(address _owner, uint256 _goalAmount) {
+    owner = payable(_owner);
     currentTotalAmount = 0;
     goalTotalAmount = _goalAmount;
     scheduledEndTime = block.timestamp + 30 days; // Linter: Avoid to make time-based decisions in your business logic [not-rely-on-time]
