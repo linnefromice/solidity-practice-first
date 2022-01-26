@@ -2,6 +2,30 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { BigNumber } from "ethers";
 
+const deployFactory = async () => {
+  const [owner] = await ethers.getSigners();
+  const factory = await ethers.getContractFactory("ProjectFactory", owner);
+  const contract = await factory.deploy();
+  await contract.deployed();
+
+  return {
+    contract: contract,
+    owner: owner,
+  };
+}
+
+describe("ProjectFactory", () => {
+  it.skip(".createProject", async () => {
+    const { contract: c, owner } = await deployFactory();
+    expect(await c.projectAddresses.length).to.equal(0);
+    const _totalAmount = ethers.utils.parseEther("0.1")
+    await c.createProject(owner.address, _totalAmount)
+    // TODO
+    // - expect(await c.projectAddresses.length).to.equal(1); <- fail
+    // - confirm deployed contract status
+  })
+})
+
 const deploy = async (goalTotalAmount: BigNumber) => {
   const [owner, ...addrs] = await ethers.getSigners();
   const factory = await ethers.getContractFactory("Project", owner);
@@ -15,7 +39,7 @@ const deploy = async (goalTotalAmount: BigNumber) => {
   };
 }
 
-describe("Project", async () => {
+describe("Project", () => {
   it(".constructor", async () => {
     const totalAmount = ethers.utils.parseEther("0.1")
     const { contract: c, owner } = await deploy(BigNumber.from(totalAmount));
