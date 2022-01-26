@@ -15,14 +15,10 @@ const deployFactory = async () => {
 }
 
 describe("ProjectFactory", () => {
-  it.skip(".createProject", async () => {
+  it(".createProject", async () => {
     const { contract: c, owner } = await deployFactory();
-    expect(await c.projectAddresses.length).to.equal(0);
     const _totalAmount = ethers.utils.parseEther("0.1")
-    await c.createProject(owner.address, _totalAmount)
-    // TODO
-    // - expect(await c.projectAddresses.length).to.equal(1); <- fail
-    // - confirm deployed contract status
+    await expect(c.createProject(owner.address, _totalAmount)).to.emit(c, "Created");
   })
 })
 
@@ -69,6 +65,11 @@ describe("Project", () => {
           const currentTotalAmount = await contract.currentTotalAmount()
           expect(currentTotalAmount).to.equal(_valueContributed.toString());
           expect(await contract.isClosed()).to.equal(false);
+        });
+        it("emit Contributed event.", async () => {
+          const { contract, owner } = await deploy(BigNumber.from(_goalAmount));
+          await expect(contract.connect(owner).contribute({ value: _goalAmount }))
+            .to.emit(contract, "Contributed").withArgs(owner.address, _goalAmount);
         });
       });
       describe("failure", () => {
@@ -129,8 +130,14 @@ describe("Project", () => {
 
   describe(".close", () => {
     describe("success", () => {
+      const _goalAmount = ethers.utils.parseEther("0.1")
       it.skip("update status to closed", () => {})
       it.skip("refund to all users", () => {})
+      it("emit Closed event.", async () => {
+        const { contract, owner } = await deploy(BigNumber.from(_goalAmount));
+        await expect(contract.connect(owner).close())
+          .to.emit(contract, "Closed").withArgs(owner.address);
+      });
     });
     describe("failure", () => {
       const _goalAmount = ethers.utils.parseEther("0.1")
@@ -146,14 +153,22 @@ describe("Project", () => {
         await expect(
           contract.connect(owner).close()
         ).to.be.revertedWith("This project is already closed.")
-
       })
     });
   });
 
   describe(".refund", () => {
     describe("success", () => {
-      it.skip("TODO", () => {})
+      const _goalAmount = ethers.utils.parseEther("0.1")
+      it.skip("emit Refunded event.", async () => {
+        const { contract, owner, addrs } = await deploy(BigNumber.from(_goalAmount));
+        const _contributor = addrs[0];
+        const _valueContributed = _goalAmount.div(BigNumber.from("10"));
+        await contract.connect(_contributor).contribute({ value: _valueContributed });
+        await contract.connect(owner).close();
+        await expect(contract.connect(_contributor).refund())
+          .to.emit(contract, "Refunded").withArgs(_contributor.address, _valueContributed.toString());
+      });
     });
     describe("failure", () => {
       const _goalAmount = ethers.utils.parseEther("0.1")
@@ -176,7 +191,17 @@ describe("Project", () => {
 
   describe(".withdraw", () => {
     describe("success", () => {
-      it.skip("TODO", () => {})
+      const _goalAmount = ethers.utils.parseEther("0.1")
+      it("emit Withdrawed event.", async () => {
+        const { contract, owner, addrs } = await deploy(BigNumber.from(_goalAmount));
+        const _contributor = addrs[0];
+        const _valueContributed = _goalAmount.div(BigNumber.from("10"));
+        await contract.connect(_contributor).contribute({ value: _valueContributed });
+        await contract.connect(_contributor).contribute({ value: _valueContributed });
+        await contract.connect(_contributor).contribute({ value: _goalAmount });
+        await expect(contract.connect(owner).withdraw())
+          .to.emit(contract, "Withdrawed").withArgs(owner.address, _goalAmount.add(_valueContributed).add(_valueContributed));
+      });
     });
     describe("failure", () => {
       const _goalAmount = ethers.utils.parseEther("0.1")

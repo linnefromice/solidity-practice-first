@@ -2,19 +2,26 @@
 
 pragma solidity ^0.8.4;
 
-
 contract ProjectFactory {
+  event Created(address _contract, address _owner);
+
   Project[] public projectAddresses;
 
   function createProject(address _projectOwner, uint _goalAmount) external {
     Project project = new Project(_projectOwner, _goalAmount);
     projectAddresses.push(project);
+    emit Created(address(project), _projectOwner);
   }
 }
 
 /// @author arata.haruyama
 /// @title Crowdfunding project
 contract Project {
+  event Contributed(address account, uint amount);
+  event Closed(address owner);
+  event Refunded(address account, uint amount);
+  event Withdrawed(address owner, uint amount);
+
   address payable public owner;
   uint256 public currentTotalAmount; // current donation amount
   uint256 public goalTotalAmount; // donation amount goal
@@ -73,6 +80,7 @@ contract Project {
     if (currentTotalAmount >= goalTotalAmount) {
       isClosed = true;
     }
+    emit Contributed(address(msg.sender), _value);
   }
 
   // Close project.
@@ -90,6 +98,7 @@ contract Project {
         }
       }
     }
+    emit Closed(owner);
   }
 
   // Refund to msg.sender.
@@ -99,20 +108,14 @@ contract Project {
       // refund
       payable(msg.sender).transfer(_donation);
       donations[msg.sender] = 0;
-      
-      // remove from addressIndexes
-      // uint _len = addressIndexes.length;
-      // for (uint i=0; i<_len; i++) {
-      //   if (msg.sender == addressIndexes[i]) {
-      //     delete addressIndexes[i];
-      //     break;
-      //   }
-      // }
     }
+
+    emit Refunded(address(msg.sender), _donation);
   }
 
   // Withdraw successed project donations.
   function withdraw() public payable onlyOwner closedPj successedPj {
     owner.transfer(currentTotalAmount);
+    emit Withdrawed(owner, currentTotalAmount);
   }
 }
