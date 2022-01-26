@@ -131,8 +131,26 @@ describe("Project", () => {
   describe(".close", () => {
     describe("success", () => {
       const _goalAmount = ethers.utils.parseEther("0.1")
-      it.skip("update status to closed", () => {})
-      it.skip("refund to all users", () => {})
+      it("update status to closed", async () => {
+        const { contract, owner } = await deploy(BigNumber.from(_goalAmount));
+        await contract.connect(owner).close();
+        expect(await contract.isClosed()).to.equal(true);
+      });
+      it("refund to all users", async () => {
+        const { contract, owner, addrs } = await deploy(BigNumber.from(_goalAmount));
+        const _valueContributed = _goalAmount.div(BigNumber.from("10"));
+        await Promise.all(
+          [0, 0, 1, 1, 1].map(
+            async num => await contract
+              .connect(addrs[num]).contribute({ value: _valueContributed })
+          )
+        )
+        expect(await contract.donations(addrs[0].address)).to.equal(_valueContributed.mul(BigNumber.from("2")));
+        expect(await contract.donations(addrs[1].address)).to.equal(_valueContributed.mul(BigNumber.from("3")));
+        await contract.connect(owner).close();
+        expect(await contract.donations(addrs[0].address)).to.equal(BigNumber.from("0"));
+        expect(await contract.donations(addrs[1].address)).to.equal(BigNumber.from("0"));
+      });
       it("emit Closed event.", async () => {
         const { contract, owner } = await deploy(BigNumber.from(_goalAmount));
         await expect(contract.connect(owner).close())
@@ -160,14 +178,14 @@ describe("Project", () => {
   describe(".refund", () => {
     describe("success", () => {
       const _goalAmount = ethers.utils.parseEther("0.1")
-      it.skip("emit Refunded event.", async () => {
+      it("emit Refunded event.", async () => {
         const { contract, owner, addrs } = await deploy(BigNumber.from(_goalAmount));
         const _contributor = addrs[0];
         const _valueContributed = _goalAmount.div(BigNumber.from("10"));
         await contract.connect(_contributor).contribute({ value: _valueContributed });
         await contract.connect(owner).close();
         await expect(contract.connect(_contributor).refund())
-          .to.emit(contract, "Refunded").withArgs(_contributor.address, _valueContributed.toString());
+          .to.emit(contract, "Refunded").withArgs(_contributor.address, 0); // close() で既に refund されているため
       });
     });
     describe("failure", () => {
