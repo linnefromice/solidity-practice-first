@@ -2,6 +2,16 @@
 
 pragma solidity ^0.8.4;
 
+
+contract ProjectFactory {
+  Project[] public projectAddresses;
+
+  function createProject(uint _goalAmount) external {
+    Project project = new Project(_goalAmount);
+    projectAddresses.push(project);
+  }
+}
+
 /// @author arata.haruyama
 /// @title Crowdfunding project
 contract Project {
