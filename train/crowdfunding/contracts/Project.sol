@@ -67,13 +67,11 @@ contract Project {
   // Contribute to this project.
   function contribute() public payable activePj {
     require(msg.value >= 0.01 ether, "Need over 0.01 ETH for contribution.");
-
     uint256 _value = msg.value;
-    uint256 _donation = donations[msg.sender];
-    if (_donation == 0) {
+    if (donations[msg.sender] == 0) {
       addressIndexes.push(msg.sender);
     }
-    _donation += _value;
+    donations[msg.sender] += _value;
     currentTotalAmount += _value;
     // action for badge
 
