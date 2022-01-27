@@ -71,6 +71,16 @@ describe("Project", () => {
           await expect(contract.connect(owner).contribute({ value: _goalAmount }))
             .to.emit(contract, "Contributed").withArgs(owner.address, _goalAmount);
         });
+        it("mint badges", async () => {
+          const _goalAmount = ethers.utils.parseEther("2.0")
+          const { contract, owner } = await deploy(BigNumber.from(_goalAmount));
+          await expect(contract.connect(owner).contribute({ value: ethers.utils.parseEther("1.0") }))
+            .to.emit(contract, "Transfer").withArgs("0x0000000000000000000000000000000000000000", owner.address, 0);
+          await expect(contract.connect(owner).contribute({ value: ethers.utils.parseEther("0.4") }))
+            .to.not.emit(contract, "Transfer");
+          await expect(contract.connect(owner).contribute({ value: ethers.utils.parseEther("1.8") }))
+            .to.emit(contract, "Transfer").withArgs("0x0000000000000000000000000000000000000000", owner.address, 2);
+        });
       });
       describe("failure", () => {
         it("Should fail when insufficient donation amount", async () => {

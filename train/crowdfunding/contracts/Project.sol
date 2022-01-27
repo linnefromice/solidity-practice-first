@@ -71,14 +71,25 @@ contract Project is ERC721 {
   // Contribute to this project.
   function contribute() public payable activePj {
     require(msg.value >= 0.01 ether, "Need over 0.01 ETH for contribution.");
+
     uint256 _value = msg.value;
-    if (donations[msg.sender] == 0) {
+    uint256 oldDonation = donations[msg.sender];
+    if (oldDonation == 0) {
       addressIndexes.push(msg.sender);
     }
-    donations[msg.sender] += _value;
+    uint256 newDonation = oldDonation + _value;
+    donations[msg.sender] = newDonation;
     currentTotalAmount += _value;
-    // action for badge
 
+    // Calculate badge amount providing contributor.
+    uint256 providingBatchQuantity = newDonation / 1 ether - oldDonation / 1 ether;
+    if (providingBatchQuantity > 0) {
+      for (uint i=0; i<providingBatchQuantity; i++) {
+        mint(msg.sender);
+      }
+    }
+
+    // Determine if this project is completed.
     if (currentTotalAmount >= goalTotalAmount) {
       isClosed = true;
     }
@@ -122,9 +133,9 @@ contract Project is ERC721 {
   }
 
   // mint Badge.
-  function mint() private {
+  function mint(address _to) private {
     uint256 tokenId = nextTokenId;
-    nextTokenId = nextTokenId + 1;
-    super._mint(msg.sender, tokenId);
+    nextTokenId = tokenId + 1;
+    super._mint(_to, tokenId);
   }
 }
