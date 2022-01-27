@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/token/ERC721/presets/ERC721PresetMinterPauserAutoId.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 contract ProjectFactory {
   event Created(address _contract, address _owner);
@@ -17,20 +16,15 @@ contract ProjectFactory {
 }
 
 /// @author arata.haruyama
-/// @title badge for contributor
-contract Badge is ERC721PresetMinterPauserAutoId {
-  constructor() ERC721PresetMinterPauserAutoId("Badge","BADGE","https://example.com/token/") {}
-}
-
-/// @author arata.haruyama
 /// @title Crowdfunding project
-contract Project {
+contract Project is ERC721 {
   event Contributed(address account, uint amount);
   event Closed(address owner);
   event Refunded(address account, uint amount);
   event Withdrawed(address owner, uint amount);
 
   address payable public owner;
+
   uint256 public currentTotalAmount; // current donation amount
   uint256 public goalTotalAmount; // donation amount goal
   uint256 public scheduledEndTime; // project's expected end date
@@ -38,6 +32,8 @@ contract Project {
 
   address[] public addressIndexes; // addresses who did contributed this project.
   mapping(address => uint256) public donations;
+
+  uint256 internal nextTokenId = 0; // token id for badge
 
   modifier onlyOwner {
     require(msg.sender == owner, "Only owner can call this.");
@@ -64,7 +60,7 @@ contract Project {
     _;
   }
 
-  constructor(address _owner, uint256 _goalAmount) {
+  constructor(address _owner, uint256 _goalAmount) ERC721("Badge", "BADGE") {
     owner = payable(_owner);
     currentTotalAmount = 0;
     goalTotalAmount = _goalAmount;
@@ -123,5 +119,12 @@ contract Project {
   function withdraw() public payable onlyOwner closedPj successedPj {
     owner.transfer(currentTotalAmount);
     emit Withdrawed(owner, currentTotalAmount);
+  }
+
+  // mint Badge.
+  function mint() private {
+    uint256 tokenId = nextTokenId;
+    nextTokenId = nextTokenId + 1;
+    super._mint(msg.sender, tokenId);
   }
 }
