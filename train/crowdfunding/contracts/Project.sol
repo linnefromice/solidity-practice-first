@@ -3,11 +3,14 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
+/// @author arata.haruyama
+/// @title Factory for creating Crowdfunding project
 contract ProjectFactory {
   event Created(address _contract, address _owner);
 
   Project[] public projectAddresses;
 
+  // Create project.
   function createProject(address _projectOwner, uint _goalAmount) external {
     Project project = new Project(_projectOwner, _goalAmount);
     projectAddresses.push(project);
